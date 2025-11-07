@@ -19,8 +19,8 @@ from tqdm import tqdm
 # ==========================================
 # CONFIGURATION
 # ==========================================
-API_ID = 123456  # replace with your actual api_id
-API_HASH = "your_api_hash_here"  # replace with your actual api_hash
+API_ID = 39059309  # replace with your actual api_id
+API_HASH = "fc852e1814d9a97a10d114f22ae7214c"  # replace with your actual api_hash
 
 # 5-year time range
 START_DATE = datetime.datetime(2020, 11, 7)
