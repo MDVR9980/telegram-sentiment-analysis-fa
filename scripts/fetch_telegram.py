@@ -1,6 +1,4 @@
 """
-fetch_telegram.py
------------------
 Fetches messages from Telegram public channels within a 5-year time window.
 Saves each channel’s data into a CSV file.
 
