@@ -1,9 +1,7 @@
 """
-Fetches messages AND their comments from Telegram public channels within a specified time window.
+Fetches messages, comments, AND emoji reactions from Telegram public channels.
 Saves each channel’s data into a CSV file.
-
-Dependencies:
-    pip install telethon pandas tqdm
+Handles different types of reactions gracefully.
 """
 
 import os
@@ -12,6 +10,7 @@ import datetime
 import pandas as pd
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError, ChannelPrivateError, ChannelInvalidError
+from telethon.tl.types import ReactionEmoji  # Import ReactionEmoji for type checking
 from tqdm.asyncio import tqdm
 
 # ==========================================
@@ -20,13 +19,15 @@ from tqdm.asyncio import tqdm
 API_ID = 39059309
 API_HASH = "fc852e1814d9a97a10d114f22ae7214c"
 
-# Set the time window to the last 5 years
 END_DATE = datetime.datetime.now()
 START_DATE = END_DATE - datetime.timedelta(days=5*365)
 
 CHANNELS = ["kafiha", "TweetyChannel", "radiofarda", "iranintlTV", "bbcpersian"]
 
-DATA_DIR = "../data"
+# --- Robust Path Configuration ---
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(SCRIPT_DIR)
+DATA_DIR = os.path.join(ROOT_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
@@ -34,7 +35,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # FETCH FUNCTION
 # ==========================================
 async def fetch_channel_messages(client, channel):
-    print(f"\n📡 Fetching messages and comments from: {channel}")
+    print(f"\n📡 Fetching data from: {channel}")
     print(f"Time window: {START_DATE.date()} to {END_DATE.date()}")
 
     messages = []
@@ -56,21 +57,31 @@ async def fetch_channel_messages(client, channel):
 
             text = msg.message or ""
             
-            # === NEW: Fetch replies (comments) for each message ===
-            reactions_text = ""
+            comments_text = ""
             if msg.replies and msg.replies.replies > 0:
                 reply_texts = []
-                # Iterate through all comments/replies of the current message
                 try:
                     async for reply in client.iter_messages(channel, reply_to=msg.id):
                         if reply.message:
-                            # We replace newlines here as well for consistency
                             reply_texts.append(reply.message.replace("\n", " "))
-                    # Join all comments with a separator
-                    reactions_text = " || ".join(reply_texts)
+                    comments_text = " || ".join(reply_texts)
                 except Exception as e:
                     print(f"  ...could not fetch replies for msg {msg.id}: {e}")
-            # =======================================================
+
+            # === MODIFIED: Handle different reaction types ===
+            emoji_reactions_str = ""
+            if msg.reactions:
+                reaction_parts = []
+                for r in msg.reactions.results:
+                    # Check if the reaction is a standard emoji reaction
+                    if isinstance(r.reaction, ReactionEmoji):
+                        reaction_parts.append(f"{r.reaction.emoticon}:{r.count}")
+                    # You can add more checks here for other types if needed,
+                    # but for now, we ignore non-emoji ones like 'ReactionPaid'.
+                
+                if reaction_parts:
+                    emoji_reactions_str = ", ".join(reaction_parts)
+            # =================================================
 
             messages.append(
                 {
@@ -79,14 +90,14 @@ async def fetch_channel_messages(client, channel):
                     "text": text.replace("\n", " "),
                     "views": getattr(msg, "views", None),
                     "forwards": getattr(msg, "forwards", None),
-                    "replies_to": getattr(msg, "reply_to_msg_id", None),
-                    "reactions": reactions_text,  # Added new column for comments
+                    "comments": comments_text,
+                    "emoji_reactions": emoji_reactions_str,
                     "channel": channel,
                 }
             )
             count += 1
 
-            if count % 100 == 0:  # Reduced frequency of updates as it's slower now
+            if count % 100 == 0:
                 print(f"  ...fetched {count} messages (latest date: {msg_date.date()})")
 
         if messages:
@@ -113,7 +124,7 @@ async def main():
     async with TelegramClient("session_sentiment", API_ID, API_HASH) as client:
         for channel in tqdm(CHANNELS, desc="Processing channels"):
             await fetch_channel_messages(client, channel)
-            await asyncio.sleep(10)  # Increased delay to be more polite to Telegram API
+            await asyncio.sleep(10)
 
 
 if __name__ == "__main__":
