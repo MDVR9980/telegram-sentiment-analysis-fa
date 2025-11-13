@@ -1,5 +1,5 @@
 """
-Fetches messages from Telegram public channels within a specified time window.
+Fetches messages AND their comments from Telegram public channels within a specified time window.
 Saves each channel’s data into a CSV file.
 
 Dependencies:
@@ -34,34 +34,44 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # FETCH FUNCTION
 # ==========================================
 async def fetch_channel_messages(client, channel):
-    print(f"\n📡 Fetching messages from: {channel}")
+    print(f"\n📡 Fetching messages and comments from: {channel}")
     print(f"Time window: {START_DATE.date()} to {END_DATE.date()}")
 
     messages = []
     count = 0
 
     try:
-        # We remove the 'limit' parameter to fetch all available messages
-        # The loop will naturally stop based on the date check below
         async for msg in client.iter_messages(channel):
-            # Skip messages without a date attribute
             if not msg.date:
                 continue
 
-            # Ensure the date is timezone-unaware for consistent comparison
             msg_date = msg.date.replace(tzinfo=None)
 
-            # If a message is older than our start date, we stop fetching for this channel
             if msg_date < START_DATE:
                 print(f"  ...reached the end of the time window. Stopping.")
                 break
 
-            # Skip messages that are newer than our end date (if any)
             if msg_date > END_DATE:
                 continue
 
-            # Append valid messages to our list
             text = msg.message or ""
+            
+            # === NEW: Fetch replies (comments) for each message ===
+            reactions_text = ""
+            if msg.replies and msg.replies.replies > 0:
+                reply_texts = []
+                # Iterate through all comments/replies of the current message
+                try:
+                    async for reply in client.iter_messages(channel, reply_to=msg.id):
+                        if reply.message:
+                            # We replace newlines here as well for consistency
+                            reply_texts.append(reply.message.replace("\n", " "))
+                    # Join all comments with a separator
+                    reactions_text = " || ".join(reply_texts)
+                except Exception as e:
+                    print(f"  ...could not fetch replies for msg {msg.id}: {e}")
+            # =======================================================
+
             messages.append(
                 {
                     "msg_id": msg.id,
@@ -70,16 +80,15 @@ async def fetch_channel_messages(client, channel):
                     "views": getattr(msg, "views", None),
                     "forwards": getattr(msg, "forwards", None),
                     "replies_to": getattr(msg, "reply_to_msg_id", None),
+                    "reactions": reactions_text,  # Added new column for comments
                     "channel": channel,
                 }
             )
             count += 1
 
-            # Progress update every 500 messages
-            if count % 500 == 0:
+            if count % 100 == 0:  # Reduced frequency of updates as it's slower now
                 print(f"  ...fetched {count} messages (latest date: {msg_date.date()})")
 
-        # Save to CSV if any messages were collected
         if messages:
             df = pd.DataFrame(messages)
             output_path = os.path.join(DATA_DIR, f"{channel}_messages.csv")
@@ -104,7 +113,7 @@ async def main():
     async with TelegramClient("session_sentiment", API_ID, API_HASH) as client:
         for channel in tqdm(CHANNELS, desc="Processing channels"):
             await fetch_channel_messages(client, channel)
-            await asyncio.sleep(5)  # A slightly longer polite delay to avoid flood waits
+            await asyncio.sleep(10)  # Increased delay to be more polite to Telegram API
 
 
 if __name__ == "__main__":
