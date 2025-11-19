@@ -83,8 +83,8 @@ Emotion Labels: \* خوشحال\
 ### Step 1: Clone & Install
 
 ``` bash
-git clone https://github.com/YOUR_USERNAME/t-sentiment-analysis-fa.git
-cd t-sentiment-analysis-fa
+git clone https://github.com/mdvr9980/telegram-sentiment-analysis-fa.git
+cd telegram-sentiment-analysis-fa
 pip install -r requirements.txt
 ```
 
