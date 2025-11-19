@@ -1,17 +1,9 @@
-# Core libraries for data handling and analysis
-pandas
-tqdm
-matplotlib
-scikit-learn
-
-# Telegram data fetching
-telethon
-
-# NLP and Machine Learning
-transformers
-torch
-torchvision
-torchaudio
-
-# Persian language processing (installed from a specific git commit)
-hazm @ git+https://github.com/mahdisharifloo/hazm.git@1a97869bbb360a8fab681552f0d0dada7c200dce
+pandas==2.3.3
+tqdm==4.67.1
+ollama==0.6.1
+hazm==0.10.0
+Telethon==1.42.0
+matplotlib==3.10.7
+seaborn==0.13.2
+notebook==7.4.7
+ipykernel==7.1.0

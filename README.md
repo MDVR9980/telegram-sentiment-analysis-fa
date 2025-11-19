@@ -1,108 +1,117 @@
-# پروژه تحلیل احساسات پست‌های تلگرام در بازه ۵ ساله
+# 🇮🇷 Persian Sentiment Analysis on Telegram (5-Year Historical Study)
 
-این پروژه یک تحلیل جامع بر روی احساسات (Sentiment Analysis) پست‌های کانال‌های عمومی تلگرام با استفاده از ابزارهای پردازش زبان طبیعی (NLP) و مدل‌های زبانی بزرگ (LLMs) انجام می‌دهد. هدف اصلی، جمع‌آوری داده‌ها از منابع آنلاین در یک بازه زمانی ۵ ساله، پیش‌پردازش متن فارسی، و در نهایت تحلیل و مصورسازی روندهای احساسی در طول زمان است.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
+![NLP](https://img.shields.io/badge/NLP-Llama3-orange?style=for-the-badge)
+![Ollama](https://img.shields.io/badge/Backend-Ollama-white?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-green?style=for-the-badge)
 
----
+## 📋 Project Overview
 
-## 🚀 ویژگی‌های اصلی
+This project involves a comprehensive **Natural Language Processing (NLP)** analysis of Persian social media sentiment over a 5-year historical period (**1399–1404 SH** / **2020–2025 AD**).
 
-- **واکشی داده از تلگرام:** جمع‌آوری هوشمند پست‌ها، کامنت‌ها و ری‌اکشن‌های ایموجی از کانال‌های عمومی تلگرام با استفاده از کتابخانه `Telethon`.
-- **پیش‌پردازش پیشرفته متن فارسی:** پاکسازی و نرمال‌سازی دقیق متن با در نظر گرفتن چالش‌های زبان فارسی و استفاده از کتابخانه `hazm`.
-- **تحلیل احساسات مبتنی بر مدل BERT:** طبقه‌بندی احساسات هر پست در ۶ دسته مجزا (Happy, Sad, Angry, Worried, Anxious, Neutral) با استفاده از یک مدل زبانی فارسی از پیش آموزش‌دیده.
-- **تحلیل زمانی:** بررسی و مصورسازی روندهای احساسی به صورت ماهانه و سالانه.
-- **تحلیل مقایسه‌ای:** گروه‌بندی نتایج بر اساس هر کانال برای مقایسه لحن و بازخورد مخاطبان.
-- **خروجی‌های ساختاریافته:** ذخیره تمام داده‌های خام، پیش‌پردازش‌شده و نتایج نهایی در فرمت‌های استاندارد `CSV` و `JSON`.
+The primary objective is to analyze public mood trends on **Telegram**, utilizing **Large Language Models (LLMs)** locally. By leveraging **Meta's Llama 3 (8B)** via **Ollama**, this project classifies thousands of posts into precise emotional categories, handling the linguistic nuances of the Persian language (Farsi), including slang, sarcasm, and cultural context.
 
----
-
-## 📂 ساختار پروژه
-
-```
-/
-├── data/              # محل ذخیره‌سازی داده‌های خام، نتایج و خروجی‌ها
-├── models/            # محل قرارگیری مدل زبانی از پیش آموزش‌دیده
-├── notebooks/         # نوت‌بوک‌ ژوپیتر برای تحلیل و مصورسازی
-│   └── sentiment_6labels.ipynb
-├── scripts/           # اسکریپت‌های پایتون
-│   └── fetch_telegram.py
-├── requirements.txt   # لیست کتابخانه‌های مورد نیاز
-└── README.md          # همین فایل
-```
+### 🎯 Key Objectives
+*   **Historical Data Mining:** Extracting 5 years of messages, reactions, and metadata from 5 major public channels using `Telethon`.
+*   **Persian NLP Pipeline:** Modular preprocessing using `Hazm` and Regex for text normalization.
+*   **LLM-Based Classification:** Using a **custom-engineered Persian System Prompt** to detect complex sentiments (e.g., distinguishing "Dark Humor" from "Sadness").
+*   **Visual Analytics:** Generating time-series trends and "Hope vs. Despair" statistical ratios.
 
 ---
 
-## 🔧 راه‌اندازی و نصب (Setup)
+## 📂 Repository Structure
 
-برای اجرای این پروژه، مراحل زیر را دنبال کنید.
+The project follows a **modular architecture** to ensure maintainability and scalability.
 
-### پیش‌نیازها
-- Python 3.10 یا بالاتر
-- دسترسی به API تلگرام (API ID و API Hash)
-
-### ۱. کلون کردن ریپازیتوری
-```bash
-git clone https://github.com/your-username/telegram-sentiment-analysis-fa.git
-cd telegram-sentiment-analysis-fa
-```
-
-### ۲. ایجاد و فعال‌سازی محیط مجازی
-توصیه می‌شود که از یک محیط مجازی برای نصب وابستگی‌ها استفاده کنید.
-```bash
-# ایجاد محیط مجازی
-python3 -m venv ai-env
-
-# فعال‌سازی (برای لینوکس/مک)
-source ai-env/bin/activate
-```
-
-### ۳. نصب وابستگی‌ها
-فایل `requirements.txt` شامل تمام کتابخانه‌های لازم است.
-```bash
+```text
+t-sentiment-analysis-fa/
+│
+├── data/                      # Data Storage
+│   ├── processed/             # Cleaned data, Checkpoints, and Final Results
+│   ├── kafiha_messages.csv    # Raw Data (Channel 1)
+│   ├── bbcpersian_messages.csv# Raw Data (Channel 2)
+│   └── ...                    # Other channel datasets
+│
+├── scripts/                   # Source Code Modules
+│   ├── __init__.py
+│   └── preprocessor.py        # Core Logic: Text Cleaning & Normalization Class
+│
+├── notebooks/                 # Jupyter Notebooks for Execution
+│   ├── sentiment_analysis.ipynb       # 🧪 Test Notebook (Rapid prototyping on 10 samples)
+│   └── full_analysis_pipeline.ipynb   # 🚀 Production Notebook (Full dataset + Checkpointing)
+│
+├── results/                   # Output Visualizations & Reports
+│   ├── trend_plot.png         # 5-Year Sentiment Trend Line
+│   └── mood_bar.png           # Channel comparison bar charts
+│
+├── requirements.txt           # Python Dependencies
+└── README.md                  # Project Documentation
+🛠️ Methodology & Tech Stack
+1. Data Collection (Scraping)
+We utilized the Telethon API to scrape historical data. The scraper fetches:
+Text Content: The body of the message.
+Metadata: Timestamp (exact date/time), Views, and Forward counts.
+Reactions: Emoji reactions (e.g., 👍, 😢, ❤️) which provide critical context for sentiment verification.
+2. Preprocessing (The scripts/preprocessor.py Module)
+Raw social media text is noisy. We implemented a robust cleaning pipeline:
+HTML & URL Removal: Stripping <tags> and http:// links.
+Noise Reduction: Removing numbers (as per assignment requirement) and non-Persian symbols.
+Normalization: Using the Hazm library to standardize Persian characters (e.g., converting Arabic 'ي' and 'ك' to Persian 'ی' and 'ک', and handling zero-width spaces).
+3. Sentiment Classification (The "Brain")
+We use Llama 3 running locally. The core innovation lies in the Prompt Engineering:
+The Challenge: Persian social media often uses "Dark Humor" (طنز تلخ) where a funny text actually implies sadness or anger regarding economic situations.
+The Solution: A Native Persian System Prompt was designed to instruct the model to interpret these nuances.
+Taxonomy (Labels):
+خوشحال (Happy): Joy, success, pure humor.
+ناراحت (Sad): Grief, dark humor, complaints about life.
+عصبانی (Angry): Rage, protest, harsh criticism.
+مضطرب (Anxious): Panic, immediate stress.
+نگران (Worried): Fear of the future, uncertainty.
+خنثی (Neutral): News, advertisements, factual statements.
+🚀 Installation & Usage Guide
+Prerequisites
+Python 3.9+
+Ollama: Download and install from ollama.com.
+Hardware: A GPU with at least 4GB VRAM is recommended (e.g., GTX 1650), though it runs on CPU/RAM with slower inference.
+Step 1: Clone & Install
+code
+Bash
+git clone https://github.com/YOUR_USERNAME/t-sentiment-analysis-fa.git
+cd t-sentiment-analysis-fa
 pip install -r requirements.txt
-```
+Step 2: Setup the Model
+Launch the Ollama server and pull the Llama 3 model:
+code
+Bash
+# Open a terminal and run:
+ollama serve
 
-### ۴. دانلود مدل زبانی
-این پروژه از مدل `SeyedAli/Persian-Text-Emotion-Bert-V1` استفاده می‌کند.
-۱. به آدرس [Hugging Face Model](https://huggingface.co/SeyedAli/Persian-Text-Emotion-Bert-V1) بروید.
-۲. بر روی `Files and versions` کلیک کرده و تمام فایل‌های مدل (مانند `config.json`, `pytorch_model.bin`, `tokenizer_config.json` و ...) را دانلود کنید.
-۳. یک پوشه جدید به نام `SeyedAli-Persian-Text-Emotion-Bert-V1` در مسیر `models/` ایجاد کرده و تمام فایل‌های دانلود شده را در آن قرار دهید.
-
----
-
-## 🏃 نحوه اجرا
-
-پروژه در دو مرحله اصلی اجرا می‌شود:
-
-### مرحله ۱: واکشی داده‌ها از تلگرام
-اسکریپت `fetch_telegram.py` وظیفه جمع‌آوری داده‌ها را بر عهده دارد.
-۱. ابتدا `API_ID` و `API_HASH` خود را در بالای فایل `scripts/fetch_telegram.py` وارد کنید.
-۲. اسکریپت را از **پوشه ریشه پروژه** اجرا کنید:
-```bash
-python scripts/fetch_telegram.py
-```
-**نکته مهم:** برای اولین اجرا، از شما شماره تلفن (با فرمت بین‌المللی مانند `+98...`)، کد ارسالی به اپلیکیشن تلگرام و در صورت وجود، رمز عبور دو مرحله‌ای خواسته می‌شود. پس از آن، یک فایل `session_sentiment.session` ایجاد می‌شود که از ورود مجدد جلوگیری می‌کند.
-
-این فرآیند بسته به حجم داده‌ها ممکن است چندین ساعت طول بکشد. پس از اتمام، فایل‌های CSV مربوط به هر کانال در پوشه `data/` ذخیره می‌شوند.
-
-### مرحله ۲: تحلیل و مصورسازی نتایج
-تمام مراحل تحلیل در نوت‌بوک ژوپیتر انجام می‌شود.
-۱. Jupyter Lab یا Jupyter Notebook را از پوشه ریشه پروژه اجرا کنید:
-```bash
-jupyter lab
-```
-۲. به پوشه `notebooks/` رفته و فایل `sentiment_6labels.ipynb` را باز کنید.
-۳. تمام سلول‌ها را به ترتیب اجرا کنید (`Run All Cells`). نوت‌بوک به صورت خودکار داده‌های جمع‌آوری شده را خوانده، پیش‌پردازش کرده، احساسات را پیش‌بینی و در نهایت نمودارها و فایل‌های خروجی را در پوشه `data/sentiment_results_batch/` تولید می‌کند.
-
----
-
-## 📊 تکنولوژی‌های استفاده شده
-
-- **Python 3.12**
-- **Telethon:** برای تعامل با API تلگرام
-- **Pandas:** برای مدیریت و پردازش داده‌ها
-- **PyTorch & Transformers (Hugging Face):** برای بارگذاری و استفاده از مدل زبانی
-- **Matplotlib:** برای مصورسازی داده‌ها و رسم نمودار
-- **Hazm:** برای نرمال‌سازی تخصصی متن فارسی
-- **Jupyter Notebook:** برای محیط تحلیل تعاملی
-
----
+# In a separate terminal:
+ollama pull llama3
+Step 3: Run the Analysis
+🅰️ Option A: Quick Test (Local Machine)
+To verify the pipeline works on a small subset (10 posts):
+Launch Jupyter: jupyter notebook
+Open notebooks/sentiment_analysis.ipynb.
+Run all cells. The result will be saved in data/processed/test_results.csv.
+🅱️ Option B: Full Production Run (Server/University Lab)
+To process the entire 5-year dataset:
+Open notebooks/full_analysis_pipeline.ipynb.
+Run the notebook.
+Note: This notebook includes a Checkpoint System. If the process is interrupted (e.g., power outage), simply restart the cell, and it will automatically resume from the last saved batch.
+📊 Results & Visualization
+The pipeline generates two key types of insights in the results/ directory:
+1. Time-Series Trend Analysis
+A line chart tracking the fluctuation of sentiments (Happy vs. Sad/Angry) over 5 years. This highlights correlations between real-world events (e.g., elections, economic shifts) and online public mood.
+2. Hope vs. Despair Ratio
+A statistical breakdown per channel, grouping sentiments into:
+Positive/Hope: ['خوشحال']
+Negative/Despair: ['ناراحت', 'عصبانی', 'نگران', 'مضطرب']
+Neutral: ['خنثی']
+⚙️ Configuration
+You can modify the notebooks to change the configuration:
+code
+Python
+MODEL_NAME = "llama3"   # You can switch to "llama2" or "mistral" if downloaded
+BATCH_SIZE = 100        # Adjust batch saving interval
+SOURCES = [...]         # Add or remove target channels
