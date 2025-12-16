@@ -132,5 +132,5 @@ To adapt the project, modify `notebooks/full_analysis_pipeline.ipynb`:
 ## 📜 License
 
 **Advanced NLP Course (Fall 1404 / 2025)**
-**Student:** Mohammad Davoud Vahhab Rajaee
+**Student:** Mohammad Davood Vahhab Rajaee
 **ID:** 4041419041
